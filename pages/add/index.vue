@@ -124,13 +124,13 @@ export default {
   }, */
   methods: {
     addThisTodo(){
+      //console.log('before commit', this.$store.state.todos)
       let newTodo = {}
       newTodo.title = this.title
       newTodo.content = this.content
       newTodo.owner = this.owner
-      console.log('before commit', this.$store.state.todos)
-      this.$store.commit('todos/ADD_NEWTODO', newTodo)
-      console.log('After commit newTodo', newTodo)
+      this.$store.commit('ADD_NEWTODO', newTodo)
+      //console.log('After commit newTodo', newTodo)
       this.title = ''
       this.content = ''
 

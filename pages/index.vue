@@ -35,22 +35,24 @@
                 <p>Vous n'êtes pas {{ owner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
               </div>
               <v-list v-if="!filtering">
-                Il y a {{ todos.length }} tâches en tout.  
+                <span>Il y a <strong>{{ todos.length }} tâches</strong> en tout.</span>
                 <!-- component "SimpleTodo"  -->
-                <v-list-tile v-for="(todo, index) in todos" :key="todo.id" style="cursor: pointer;" @click="$router.push(`/get/${todo.title}`)"><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
+                <v-list-tile v-for="(todo, index) in todos" :key="todo.id" style="cursor: pointer;" 
+                @click="$router.push(`/get/${todo.title}`)"
+                ><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
                   <div class="text-xs-right">
-                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
+                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" style="text-decoration: none;" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
                     <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
                   </div>
                 </v-list-tile>
               </v-list>
               <v-list v-else>
-                Il y a {{ filteredTodos.length }} tâches pour {{ selectedOwner }}  
+                <span>Il y a <strong>{{ filteredTodos.length }} tâches </strong>pour <strong>{{ selectedOwner }}</strong>.</span>  
                 <!-- component "SimpleTodo"  -->
                 <v-list-tile v-for="(todo, index) in filteredTodos" :key="todo.id" style="cursor: pointer;" @click="$router.push(`/get/${todo.title}`)"><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
                   <div class="text-xs-right">
-                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
-                    <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon outline center>delete</v-icon></nuxt-link></v-chip>
+                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" style="text-decoration: none;" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
+                    <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
                   </div>
                 </v-list-tile>
               </v-list>
@@ -80,7 +82,7 @@
 </template>
 
 <script>
-
+import { getters } from 'vuex'
 import { mutations } from 'vuex'
 export default {
     data(){
@@ -96,20 +98,19 @@ export default {
     },
     computed: {
       invitation(){
-        if (this.todos.length === 0) return 'N\'hésitez pas à créer une tâche !'
-        else return ''
+        console.log('TODOS FOR INVITATION', this.todos)
+        if (!this.todos) return 'N\'hésitez pas à créer une tâche !'
+        else return
       },
-      todos: {
-        get: function(){
-          console.log('TODOS ON PAGES/INDEX.JS', this.$store.state.todos.todos)
-          return this.$store.state.todos.todos
-        },
-        set: function(filteredTodos){
-          this.todos = this.filteredTodos
-        }
+      todos() {
+        //console.log(this.$store)
+        //console.log('GET TODOS', this.$store.state.todos.todos)
+        return this.$store.getters.getTodos
       },
       owners(){
-        return this.$store.state.owners
+        return this.$store.getters.getOwners
+        //if (this.$store.state.owners.length > 0) return this.$store.state.owners
+        //else return JSON.parse(localStorage.getItem('owners'))
       },
       currentOwner(){
         return this.$store.state.currentOwner
@@ -122,6 +123,9 @@ export default {
 
     },
     methods: {
+      display(todo){
+        console.log(todo)
+      },
       getPage: function(todo) {
         console.log('From the homepage', todo)
         this.$router.push( `/get/${todo.title}` )
@@ -151,19 +155,32 @@ export default {
         this.filtering = false
       },
       filterTodosByOwner(owner){
-        //let sel = this.$refs.own
-        //let selectedOwner = sel.selectedItems[0]
-        //console.log('le select', sel)
         console.log('filteringTodos...', owner)
-        //console.log('filteringTodos...', value)
         this.filteredTodos = this.todos.filter(t => t.owner === owner)
         this.filtering = true
         this.selectedOwner = owner
+      },
+      getData(){
+        //todos
+        this.$store.dispatch('todos/resetWithStorage')
+        //owners
+        this.$store.dispatch('resetWithStorage')
       }
-    },
-    /*mounted(){
-      console.log('MOUNTED', todos.length)
-    }*/
+    },/*
+    created(){
+      this.$store.dispatch('resetWithStorage')
+      //console.log('CREATED BEFORE STORAGE', localStorage.getItem('owners'))
+      //this.$store.commit('todos/RETRIEVE_TODOS')
+      //console.log(localStorage.getItem('owners'))
+      //this.owner = this.localStorage.getItem('owner')
+      //this.getData()
+    },*/
+    mounted(){
+      this.$store.commit('RESET_WITH_STORAGE')
+      //this.$store.dispatch('todos/resetWithStorage')
+      //console.log('MOUNTED AFTER STORAGE', window.localStorage.getItem('todos'))
+      //this.todos = JSON.parse(window.localStorage.getItem('todos'))
+    } 
 
 }
 </script>

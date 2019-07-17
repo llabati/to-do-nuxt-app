@@ -18,7 +18,7 @@
         
       </v-card>
       <v-toolbar>
-          <v-toolbar-title>Tâche à supprimer pour {{ todo.owner }}</v-toolbar-title>
+          <v-toolbar-title>Tâche à supprimer pour {{ todo.owner }}</v-toolbar-title> 
           <v-spacer></v-spacer>
           <v-alert success v-if="success">Cette tâche vient d'être supprimée.</v-alert>
       </v-toolbar>
@@ -38,14 +38,16 @@ export default {
 
     data(){
         return {
-            title: this.$route.params.index,
-            success: false
+          success: false
         }
     },
     computed: {
+        title() {
+          return this.$route.params.index
+        },
         
         todo(title){
-            return this.$store.state.todos.todos.find(t => t.title === this.title)
+            return this.$store.state.todos.find(t => t.title === this.title)
         },
         headline(){
             return `La tâche "${this.todo.title}" va être supprimée.`
@@ -54,7 +56,7 @@ export default {
     
     methods: {
         deleteThisTodo: function(title){
-          this.$store.commit('todos/DELETE_TODO', this.title)
+          this.$store.commit('DELETE_TODO', this.title)
           this.success = true
           setTimeout(this.$router.push('/'), 5000)
         }

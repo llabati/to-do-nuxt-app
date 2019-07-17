@@ -24,7 +24,7 @@
    <v-card>
        <v-card-text>
            <!-- component "SimpleTodo" ??? -->
-           <v-list>
+           <v-list v-if="todo">
                <v-list-tile>
                  <p class="inline-small"><strong>Titre : </strong></p><p class="inline-large"><strong>{{ todo.title }}</strong></p>
                </v-list-tile>
@@ -35,8 +35,8 @@
                  <p class="inline-small">Responsable : </p><p class="inline-large" style="color: red;">{{ todo.owner }}</p>
                 </v-list-tile>
             </v-list>
-            <v-chip color="orange"><nuxt-link class="link" :to="`/put/${todo.title}`"><v-icon left>update</v-icon>Modifier cette tâche</nuxt-link></v-chip>
-            <v-chip color="green" right><nuxt-link class="link" :to="'/'">Retour à la liste des tâches</nuxt-link></v-chip>
+            <!--<v-chip color="orange"><nuxt-link class="link" :to="`/put/${todo.title}`"><v-icon left>update</v-icon>Modifier cette tâche</nuxt-link></v-chip>
+            <v-chip color="green" right><nuxt-link class="link" :to="'/'">Retour à la liste des tâches</nuxt-link></v-chip> -->
         </v-card-text>
     </v-card>
     </v-flex>
@@ -47,11 +47,11 @@
 import { mutations } from 'vuex'
 export default {
   computed: {
-    title(){
+    ind(){
       return this.$route.params.index
     },
     todo(){
-      return this.$store.state.todos.todos.find(t => t.title === this.title)
+      return this.$store.state.todos.find(t => t.title === this.ind)
     }
   }
 }
