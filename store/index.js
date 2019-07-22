@@ -16,16 +16,25 @@ export const getters = {
         else return JSON.parse(localStorage.getItem('todos'))
     }
 }
-/*
+
 export const actions = { 
-    resetWithStorage: function( { commit } ){
+    /*resetWithStorage: function( { commit } ){
         JSON.parse(localStorage.getItem('owners'))
         .then( res => {
         commit("RESET_WITH_STORAGE", res )
         })
-    }
+    }*/
+    saveNewOrder( { commit }, payload) {
+        console.log(payload)
+        const todos = []
+        payload.map(todo => {
+          todos.push(todo)
+        })
+        
+        commit('REORDER_TODOS', todos)
+      }
 }
-*/
+
 export const mutations = {
     RESET_WITH_STORAGE: function(state){
         let retrieve = JSON.parse(localStorage.getItem('todos'))
@@ -69,6 +78,25 @@ export const mutations = {
         console.log(state.todos)
         let ind = state.todos.indexOf(deleted)
         state.todos.splice(ind, 1)
+        localStorage.setItem('todos', JSON.stringify(state.todos))
+    },
+    UPDATE_TODO(state, res){
+        console.log('UPDATE_TODO', res.ind, res.title, res.owner, res.content, res.advancement)
+        let update = state.todos.find( t => t.title === res.ind)
+            if (res.title !== '') update.title = res.title
+          if (res.owner !== '') update.owner = res.owner
+          if (res.content !== '') update.content = res.content
+          if (res.advancement !== '') update.advancement = res.advancement  
+        //state.todos.splice(ind, 1, todo)
+        /*let updated = state.todos.find( t => t.title === ind )
+        updated.title = update.title
+        updated.owner = update.owner
+        updated.content = update.content
+        updated.advancement = update.advancement*/
+        localStorage.setItem('todos', JSON.stringify(state.todos))
+    },
+    REORDER_TODOS(state, todos){
+        state.todos = [ ...todos]
         localStorage.setItem('todos', JSON.stringify(state.todos))
     }
 }

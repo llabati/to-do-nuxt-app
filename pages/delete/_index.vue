@@ -8,40 +8,52 @@
       <v-card>
         <v-card-title class="headline amber lighten-4 indigo--text text--darken-3">Effacer une tâche</v-card-title>
         <v-card-text>
-          <p>Supprimer une tâche... est un moyen de pouvoir ajouter une autre tâche.</p>
-          <div class="text-xs-right">
-            <em><small>Ludovic Labati</small></em>
-          </div>
+          <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
+          
           <hr class="my-3">
           
         </v-card-text>
         
       </v-card>
-      <v-toolbar>
+      <sub-header :headerMessage="headerMessage"></sub-header>
+      <!--<v-toolbar>
           <v-toolbar-title>Tâche à supprimer pour {{ todo.owner }}</v-toolbar-title> 
           <v-spacer></v-spacer>
           <v-alert success v-if="success">Cette tâche vient d'être supprimée.</v-alert>
-      </v-toolbar>
+      </v-toolbar> -->
       <v-card>
         <v-card-title class="headline">{{ headline }}</v-card-title>
           <v-card-actions>
               <div class="text-xs-right"><v-chip id="del" color="red" v-on:click="deleteThisTodo(todo)">Confirmer la suppression</v-chip></div>
           </v-card-actions>
+      <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
       </v-card>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-
+import WelcomeCard from '../../components/WelcomeCard'
+import FooterActions from '../../components/FooterActions'
+import SubHeader from '../../components/SubHeader'
 export default {
 
     data(){
         return {
-          success: false
+          success: false,
+          welcomeMessage: 'Supprimer une tâche... est un moyen de pouvoir ajouter une autre tâche.',
+
+          notodo:false,
+          getpage: true,
+          putpage: false,
+          deletepage: false,
+          addpage: false
         }
     },
     computed: {
+        headerMessage() {
+          return `Tâche à supprimer pour ${this.todo.owner}`
+        },
         title() {
           return this.$route.params.index
         },
@@ -51,7 +63,8 @@ export default {
         },
         headline(){
             return `La tâche "${this.todo.title}" va être supprimée.`
-        }
+        },
+
     },
     
     methods: {
@@ -60,6 +73,11 @@ export default {
           this.success = true
           setTimeout(this.$router.push('/'), 5000)
         }
+    },
+    components: {
+      WelcomeCard,
+      SubHeader,
+      FooterActions
     }
     
 }

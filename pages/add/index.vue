@@ -8,15 +8,14 @@
       <v-card>
         <v-card-title class="headline amber lighten-4 indigo--text text--darken-3">Ajouter une tâche</v-card-title>
         <v-card-text>
-          <p>Ajouter une tâche... c'est en avoir supprimé d'autres avant.</p>
-          <div class="text-xs-right">
-            <em><small>Ludovic Labati</small></em>
-          </div>
+          <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
+          
           
         </v-card-text>
-        <v-toolbar>
+        <sub-header :headerMessage="headerMessage"></sub-header>
+        <!--<v-toolbar>
               <v-toolbar-title>Caractéristiques de la tâche à ajouter</v-toolbar-title>
-        </v-toolbar>
+        </v-toolbar> -->
         <v-card-text>
             <v-list two-line>
                 <!-- component ActionItem -->
@@ -31,77 +30,68 @@
                         <v-textarea ref="content" auto-grow rows="3" style="display: block; width: 100%;" solo placeholder="Décrivez la tâche" v-model="content"></v-textarea>
                     </v-list-tile-content>
                 </v-list-tile>
-                <!-- component ActionItem -->
-                <!--<v-list-tile>
-                    <v-list-tile-content xs12>
-                      <v-menu
-            ref="menu1"
-            v-model="menu1"
-            :close-on-content-click="false"
-            :nudge-right="40"
-            lazy
-            transition="scale-transition"
-            offset-y
-            full-width
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on }">
-              <v-text-field
-                v-model="dateFormatted"
-                label="Date"
-                hint="MM/DD/YYYY format"
-                persistent-hint
-                prepend-icon="event"
-                @blur="date = parseDate(dateFormatted)"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker v-model="date" no-title @input="menu1 = false"></v-date-picker>
-          </v-menu>
-          
-   
-  
-        
-            
-              
-                    </v-list-tile-content>
-                </v-list-tile>  -->
+                
                 <v-list-tile>
                     <v-list-tile-content>
                         <p>Responsable de la tâche: {{ owner }}<v-chip color="amber lighten-4" @click="changeOwner">Changer le responsable</v-chip></p>
                     </v-list-tile-content>
-                    <v-list-tile-content v-if="change" xs12>
-                      <v-text-field style="display: block; width: 100%;" ref="owner" solo label="Nouveau responsable" placeholder="Nouveau responsable" v-model="newOwner"></v-text-field>
+                </v-list-tile>
+
+                <v-list-tile v-if="change">
+                    <v-list-tile-content>
+                      <v-text-field v-show="change" style="display: block; width: 100%;" ref="owner" solo label="Nouveau responsable" v-model="newOwner"></v-text-field>
                     </v-list-tile-content>
+                </v-list-tile>  
+
+                <v-list-tile style="margin-top: 20px;">
+                    <v-list-tile-content>
+                        <p>Avancement de la tâche: {{ advancement }}</p>
+                        <div>
+                    <v-btn @click="setAdvancement(20)">20</v-btn>
+                    <v-btn @click="setAdvancement(40)">40</v-btn>
+                    <v-btn @click="setAdvancement(60)">60</v-btn>
+                    <v-btn @click="setAdvancement(80)">80</v-btn>
+                    </div>
+                    </v-list-tile-content>
+                    
                 </v-list-tile>
             </v-list>   
         </v-card-text>
         <v-card-actions>
             <v-chip color="green" class="white--text" v-on:click="addThisTodo">Confirmez l'ajout</v-chip>
-            <v-chip color="primary" class="white--text" v-on:click="$router.push('/')">Retour à la liste</v-chip>
+            <!--<v-chip color="blue" class="white--text" v-on:click="$router.push('/')">Retour à la liste</v-chip> -->
         </v-card-actions> 
 
+      <footer-actions :notodo="notodo" :getpage="getpage" :addpage="addpage"></footer-actions>
       </v-card>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-
+import WelcomeCard from '../../components/WelcomeCard'
+import SubHeader from '../../components/SubHeader'
+import FooterActions from '../../components/FooterActions'
 export default {
   
   data(){
     return {
+      welcomeMessage: 'Ajouter une tâche... c\'est en avoir supprimé d\'autres avant.',
+      headerMessage: 'Caractéristiques de la tâche à ajouter',
+      one: false,
+      two: false,
       title: '',
       content: '',
       date: '',
       change: false,
-      newOwner: ''
-      
-    //date: new Date().toISOString().substr(0, 10),
-    //dateFormatted: formatDate(new Date().toISOString().substr(0, 10)),
-    //menu1: false,
+      newOwner: '', 
+      advancement: 0,
+      notodo: false,
+      getpage: true,
+      putpage: false,
+      deletepage: false,
+      addpage: false
+
     }
   },
   computed: {
@@ -111,17 +101,7 @@ export default {
         else
         return this.newOwner
       }
-
-    /*computedDateFormatted () {
-      return this.formatDate(this.date)
-    } */
   },
-/*
-  watch: {
-    date (val) {
-      this.dateFormatted = this.formatDate(this.date)
-    }
-  }, */
   methods: {
     addThisTodo(){
       //console.log('before commit', this.$store.state.todos)
@@ -129,6 +109,7 @@ export default {
       newTodo.title = this.title
       newTodo.content = this.content
       newTodo.owner = this.owner
+      newTodo.advancement = this.advancement
       this.$store.commit('ADD_NEWTODO', newTodo)
       //console.log('After commit newTodo', newTodo)
       this.title = ''
@@ -137,19 +118,15 @@ export default {
     },
     changeOwner(){
       this.change = true
-    },/*
-    formatDate (date) {
-      if (!date) return null
-
-      const [year, month, day] = date.split('-')
-      return `${month}/${day}/${year}`
     },
-    parseDate (date) {
-      if (!date) return null
-
-      const [month, day, year] = date.split('/')
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-    } */
+    setAdvancement(value){
+      this.advancement = value
+      }
+  },
+  components: {
+    WelcomeCard,
+    SubHeader,
+    FooterActions
   }
   
 }

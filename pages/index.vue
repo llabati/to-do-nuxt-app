@@ -5,9 +5,9 @@
     justify-center
     align-center>
     <v-flex xs12 md10>
-      <v-card>
+      <v-card> 
         <v-tooltip bottom color="blue"><v-card-title slot="activator" class="headline amber lighten-4 indigo--text text--darken-3">Ma liste des tâches</v-card-title><span>Pour voir les détails, cliquez sur la tâche.</span></v-tooltip>
-
+        <!-- Registration -->
         <v-card-text>
             <v-form v-if="!account">
             <v-text-field
@@ -19,25 +19,24 @@
             <v-btn color="green" class="white--text" @click="validateAccount">Connectez-vous</v-btn>
             <v-btn color="deep-orange lighten-4" @click="createAccount">Créez votre compte</v-btn>
             </v-form> 
-            <p v-if="warning" style="color: red; margin-bottom: 10px;"><strong>Vous ne semblez pas être déjà indentifié. Veuillez créer votre compte.</strong></p>
-          
-            <p>Tous les utilisateurs identifiés peuvent déposer leurs tâches et en noter l'avancement. <strong>Bienvenue à tous ! </strong></p>
-            <div class="text-xs-right">
-              <em><small>Ludovic Labati</small></em>
-            </div>
-            <div v-if="account">
-              <div v-if="currentOwner">
-                <h3>Bienvenue à {{ currentOwner }} !</h3>
+            <p v-if="warning" style="color: red; margin-bottom: 10px;"><strong>Vous ne semblez pas être déjà identifié. Veuillez créer votre compte.</strong></p>
+          <!-- Welcome -->
+          <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
+           
+            <div v-if="currentOwner">
+              <div>
+                <h3>Bienvenue à {{ currentOwner }} !!!</h3>
                 <p>Vous n'êtes pas {{ currentOwner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
               </div>
-              <div v-else>
+              <div v-if="!currentOwner && !account">
                 <h3>Bienvenue à {{ owner }} !</h3>
                 <p>Vous n'êtes pas {{ owner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
-              </div>
+              </div> 
               <v-list v-if="!filtering">
                 <span>Il y a <strong>{{ todos.length }} tâches</strong> en tout.</span>
                 <!-- component "SimpleTodo"  -->
-                <v-list-tile v-for="(todo, index) in todos" :key="todo.id" style="cursor: pointer;" 
+                <draggable v-model="todos" group="todos">
+                <v-list-tile v-for="(todo, index) in todos" :key="todo.id" class="list-item"
                 @click="$router.push(`/get/${todo.title}`)"
                 ><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
                   <div class="text-xs-right">
@@ -45,27 +44,34 @@
                     <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
                   </div>
                 </v-list-tile>
+                </draggable>
               </v-list>
               <v-list v-else>
                 <span>Il y a <strong>{{ filteredTodos.length }} tâches </strong>pour <strong>{{ selectedOwner }}</strong>.</span>  
                 <!-- component "SimpleTodo"  -->
-                <v-list-tile v-for="(todo, index) in filteredTodos" :key="todo.id" style="cursor: pointer;" @click="$router.push(`/get/${todo.title}`)"><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
+                <draggable v-model="filteredTodos">
+                <v-list-tile v-for="(todo, index) in filteredTodos" :key="todo.id" class="list-item" @click="$router.push(`/get/${todo.title}`)"><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
                   <div class="text-xs-right">
                     <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" style="text-decoration: none;" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
                     <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
                   </div>
                 </v-list-tile>
-              </v-list>
+                </draggable>
                 
+              </v-list>
+                <!-- Actions -->
             <v-layout row wrap align-left>
               <v-btn large round color="gray" v-for="owner in owners" :key="owner.id" @click="filterTodosByOwner(owner)">{{ owner }}</v-btn>
               <v-btn large round color="green" class="white--text" @click="filtering = false">Liste complète</v-btn>
             </v-layout>
-              <div>
+
+            <!-- FooterActions -->
+            <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
+              <!--<div>
                 <p>{{ invitation }}
                   <v-chip class="elevation-2" color="green"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" to="/add"><strong>Nouvelle tâche</strong></nuxt-link></v-chip>
                 </p>
-              </div>
+              </div> -->
               
             </div>
           
@@ -84,16 +90,24 @@
 <script>
 import { getters } from 'vuex'
 import { mutations } from 'vuex'
+import draggable from 'vuedraggable'
+import WelcomeCard from '../components/WelcomeCard'
+import FooterActions from '../components/FooterActions'
+
 export default {
     data(){
       return {
+        welcomeMessage: 'Tous les utilisateurs identifiés peuvent déposer leurs tâches et en noter l\'avancement. Bienvenue à tous !',
         owner: '',
         account: false,
         filtering: false,
         warning: false,
         selectedOwner: '',
-        filteredTodos: []
-
+        filteredTodos: [],
+        getpage: false,
+        putpage: false,
+        deletepage: false,
+        addpage: true
       }
     },
     computed: {
@@ -102,26 +116,32 @@ export default {
         if (!this.todos) return 'N\'hésitez pas à créer une tâche !'
         else return
       },
-      todos() {
-        //console.log(this.$store)
-        //console.log('GET TODOS', this.$store.state.todos.todos)
-        return this.$store.getters.getTodos
+      notodo(){
+        if (this.todos.length === 0) return true
+      },
+      todos: {
+        get(){
+          return this.$store.getters.getTodos
+        },
+        set(value){
+          this.$store.dispatch('saveNewOrder', value)
+        }
       },
       owners(){
         return this.$store.getters.getOwners
         //if (this.$store.state.owners.length > 0) return this.$store.state.owners
         //else return JSON.parse(localStorage.getItem('owners'))
       },
-      currentOwner(){
-        return this.$store.state.currentOwner
+      currentOwner: {
+        get(){
+          return this.$store.state.currentOwner
+        },
+        set(value){
+          this.$store.commit('CHANGE_CURRENTOWNER', value)
+        }
       }
     },
-    watch: {
-      filtering(){
-        console.log('Filtering')
-      }
 
-    },
     methods: {
       display(todo){
         console.log(todo)
@@ -141,6 +161,7 @@ export default {
         let owners = this.$store.state.owners
         if ( owners.includes(this.owner) ) this.account = true
         else this.warning = true 
+        this.currentOwner = this.owner
         this.filtering = false
       },
       createAccount(){
@@ -159,27 +180,19 @@ export default {
         this.filteredTodos = this.todos.filter(t => t.owner === owner)
         this.filtering = true
         this.selectedOwner = owner
-      },
-      getData(){
-        //todos
-        this.$store.dispatch('todos/resetWithStorage')
-        //owners
-        this.$store.dispatch('resetWithStorage')
+        this.currentOwner = owner
       }
-    },/*
-    created(){
-      this.$store.dispatch('resetWithStorage')
-      //console.log('CREATED BEFORE STORAGE', localStorage.getItem('owners'))
-      //this.$store.commit('todos/RETRIEVE_TODOS')
-      //console.log(localStorage.getItem('owners'))
-      //this.owner = this.localStorage.getItem('owner')
-      //this.getData()
-    },*/
+    },
     mounted(){
       this.$store.commit('RESET_WITH_STORAGE')
       //this.$store.dispatch('todos/resetWithStorage')
       //console.log('MOUNTED AFTER STORAGE', window.localStorage.getItem('todos'))
       //this.todos = JSON.parse(window.localStorage.getItem('todos'))
+    },
+    components: {
+      draggable,
+      WelcomeCard,
+      FooterActions
     } 
 
 }
@@ -192,6 +205,13 @@ export default {
   padding: 1%;
   border: solid 1px gray;
   box-shadow: 1px 1px 1px 1px gray;
+}
+
+.list-item {
+  margin: 2px 0;
+  border: solid 1px gray;
+  padding: 3px;
+  cursor: pointer;
 }
 </style>
 
