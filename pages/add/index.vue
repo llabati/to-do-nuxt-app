@@ -43,6 +43,17 @@
                     </v-list-tile-content>
                 </v-list-tile>  
 
+                <v-list-tile>
+                    <v-list-tile-content>
+                      <p>Date de réalisation</p><div style="display: flex; flex-direction: row;">
+                      <div style="display: inline-block; width: 30%; margin-right: 4%;" ><input style="border: solid 1px gray" ref="day"  placeholder="Jour" v-model="day"></div>
+                      <div style="display: inline-block; width: 30%; margin-right: 4%;" ><input style="border: solid 1px gray" ref="month"  placeholder="Mois (en chiffres)" v-model="month"></div>
+                      <div style="display: inline-block; width: 30%;" ><input style="border: solid 1px gray" ref="year"  placeholder="Année" v-model="year">
+                      <v-chip @click="setDate">Valider la date</v-chip></div> 
+                      </div>
+                    </v-list-tile-content>
+                </v-list-tile>  
+
                 <v-list-tile style="margin-top: 20px;">
                     <v-list-tile-content>
                         <p>Avancement de la tâche: {{ advancement }}</p>
@@ -82,10 +93,13 @@ export default {
       two: false,
       title: '',
       content: '',
-      date: '',
+      date: {},
       change: false,
       newOwner: '', 
       advancement: 0,
+      day: '',
+      month: '',
+      year: '',
       notodo: false,
       getpage: true,
       putpage: false,
@@ -110,6 +124,7 @@ export default {
       newTodo.content = this.content
       newTodo.owner = this.owner
       newTodo.advancement = this.advancement
+      newTodo.date = this.date
       this.$store.commit('ADD_NEWTODO', newTodo)
       //console.log('After commit newTodo', newTodo)
       this.title = ''
@@ -121,7 +136,12 @@ export default {
     },
     setAdvancement(value){
       this.advancement = value
-      }
+    },
+    setDate(){
+      this.date.day = this.day
+      this.date.month = this.month
+      this.date.year = this.year
+    }
   },
   components: {
     WelcomeCard,

@@ -9,31 +9,38 @@
         <v-card-title class="headline amber lighten-4 indigo--text text--darken-3">Mettre une tâche à jour</v-card-title>
         <v-card-text>
           <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
-          <!--<p>Mettre une tâche à jour... c'est savourer par anticipation le moment où on la terminera.</p>
-          <div class="text-xs-right">
-            <em><small>Ludovic Labati</small></em>
-          </div> -->
+          
           <hr class="my-3">
           
         </v-card-text>
       </v-card>
       <sub-header :headerMessage="headerMessage"></sub-header>
-      <!--  <v-toolbar>
-          <v-toolbar-title>Caractéristiques de {{ todo.title }}</v-toolbar-title>
-      </v-toolbar>  -->
+      
       <v-card>   
-        <v-card-text>
-            <v-list two-line>
-                <v-list-tile><v-list-tile-content><v-list-tile-title class="strong">Titre actuel de la tâche : </v-list-tile-title>
-                    <v-list-tile-sub-title class="strong"><!--{{ todo.title }}--></v-list-tile-sub-title></v-list-tile-content>
-                    <v-list-tile-content><v-text-field solo placeholder="Modifier le titre" v-model="title"></v-text-field></v-list-tile-content></v-list-tile>
-                <v-list-tile><v-list-tile-content><v-list-tile-title class="strong">Responsable : </v-list-tile-title>
-                    <v-list-tile-sub-title class="strong"><!--{{ todo.owner }}--></v-list-tile-sub-title></v-list-tile-content>
-                    <v-list-tile-content><v-text-field solo placeholder="Modifier le responsable" v-model="owner"></v-text-field></v-list-tile-content></v-list-tile>
-                <v-list-tile><v-list-tile-content><v-list-tile-title class="strong">Description : </v-list-tile-title>
-                  <v-list-tile-sub-title class="strong"><!--{{ todo.content }}--></v-list-tile-sub-title></v-list-tile-content>
-                  <v-list-tile-content><v-text-field solo placeholder="Modifier la description" v-model="content"></v-text-field></v-list-tile-content></v-list-tile>
-                <v-list-tile><v-list-tile-content><v-list-tile-title class="strong">Modifier l'avancement : </v-list-tile-title>
+        <display-todo :todo="todo" :ind="ind" :put="put"></display-todo>
+        <!--<v-card-text>
+            <v-list two-line style="margin-bottom: 20px">
+                <v-list-tile>
+                 <p class="inline-small"><strong>Titre : </strong></p><p class="inline-large"><strong>{{ todo.title }}</strong></p><br>
+               </v-list-tile>
+               <v-list-tile>
+                <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier le titre" v-model="title"></v-text-field></v-list-tile-content>
+               </v-list-tile>
+               <v-list-tile>
+                 <p class="inline-small"><strong>Description : </strong></p><p class="inline-large">{{ todo.content }}</p>
+               </v-list-tile>
+               <v-list-tile>
+                  <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier la description" v-model="content"></v-text-field></v-list-tile-content>
+               </v-list-tile>         
+               <v-list-tile>
+                 <p class="inline-small"><strong>Responsable : </strong></p><p class="inline-large" style="color: red;">{{ todo.owner }}</p>
+               </v-list-tile>  
+               <v-list-tile>
+                 <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier le responsable" v-model="owner"></v-text-field></v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile>
+                 <div class="inline-small" style="padding-top: 10px"><p><strong>Avancement : </strong></p></div><v-progress-circular :rotate="-90" :size="60" :width="10" :value="todo.advancement" color="blue">{{ todo.advancement }}</v-progress-circular>
+                <v-list-tile-content><p>Modifier l'avancement : </p>
                   <div>
                     <v-btn v-if="todo.advancement === 0" @click="changeAdvancement(20)">20</v-btn>
                     <v-btn v-if="todo.advancement < 40" @click="changeAdvancement(40)">40</v-btn>
@@ -41,15 +48,12 @@
                     <v-btn v-if="todo.advancement < 80" @click="changeAdvancement(80)">80</v-btn>
                     <v-btn v-if="todo.advancement < 100" @click="changeAdvancement(100)">100</v-btn> 
                     </div>
-                    <!--<v-list-tile-sub-title class="strong">{{ todo.advancement }}</v-list-tile-sub-title></v-list-tile-content>
-                    <v-list-tile-content><v-input label="Modifier l'avancement" value="number" v-model="advancement"></v-input></v-list-tile-content> --></v-list-tile-content></v-list-tile>
-
-                
+                </v-list-tile-content>
+               </v-list-tile>
                     
-                    <!--<v-chip id="true" color="blue" v-show="todo.advancement===false" v-on:click="setToCompleted">Marquer comme fait</v-chip> -->
             </v-list>
             <v-chip class="link" color="orange" v-on:click="setChange(todo)">Modifier</v-chip>
-        </v-card-text>
+        </v-card-text> -->
       <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
       </v-card>
     </v-flex>
@@ -60,6 +64,7 @@
 import WelcomeCard from '../../components/WelcomeCard'
 import SubHeader from '../../components/SubHeader'
 import FooterActions from '../../components/FooterActions'
+import DisplayTodo from '../../components/DisplayTodo'
 export default {
   data(){
     return {
@@ -73,15 +78,15 @@ export default {
       getpage: true,
       putpage: false,
       deletepage: false,
-      addpage: false
+      addpage: false,
+      put: true
     }
   },
   computed: {
     headerMessage(){
-      return `Caractéristiques de ${this.todo.title}`
+      return `Caractéristiques de " ${this.todo.title} "`
     },
     ind(){
-      console.log(this.$route.params.index)
       return this.$route.params.index
     },
     todo(){
@@ -124,6 +129,7 @@ export default {
   components: {
     WelcomeCard,
     SubHeader,
+    DisplayTodo,
     FooterActions
   }
 }

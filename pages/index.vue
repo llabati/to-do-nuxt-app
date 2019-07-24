@@ -20,7 +20,7 @@
             <v-btn color="deep-orange lighten-4" @click="createAccount">Créez votre compte</v-btn>
             </v-form> 
             <p v-if="warning" style="color: red; margin-bottom: 10px;"><strong>Vous ne semblez pas être déjà identifié. Veuillez créer votre compte.</strong></p>
-          <!-- Welcome -->
+
           <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
            
             <div v-if="currentOwner">
@@ -32,46 +32,12 @@
                 <h3>Bienvenue à {{ owner }} !</h3>
                 <p>Vous n'êtes pas {{ owner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
               </div> 
-              <v-list v-if="!filtering">
-                <span>Il y a <strong>{{ todos.length }} tâches</strong> en tout.</span>
-                <!-- component "SimpleTodo"  -->
-                <draggable v-model="todos" group="todos">
-                <v-list-tile v-for="(todo, index) in todos" :key="todo.id" class="list-item"
-                @click="$router.push(`/get/${todo.title}`)"
-                ><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
-                  <div class="text-xs-right">
-                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" style="text-decoration: none;" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
-                    <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
-                  </div>
-                </v-list-tile>
-                </draggable>
-              </v-list>
-              <v-list v-else>
-                <span>Il y a <strong>{{ filteredTodos.length }} tâches </strong>pour <strong>{{ selectedOwner }}</strong>.</span>  
-                <!-- component "SimpleTodo"  -->
-                <draggable v-model="filteredTodos">
-                <v-list-tile v-for="(todo, index) in filteredTodos" :key="todo.id" class="list-item" @click="$router.push(`/get/${todo.title}`)"><v-list-tile-content>{{ index + 1 }} -- {{ todo.title }}</v-list-tile-content>
-                  <div class="text-xs-right">
-                    <v-chip color="orange"><v-icon left>update</v-icon><nuxt-link class="link" style="text-decoration: none;" :to="`/put/${todo.title}`">Mettre à jour</nuxt-link></v-chip>
-                    <v-chip color="red"><nuxt-link class="link" :to=" `/delete/${todo.title}` "><v-icon center>delete</v-icon></nuxt-link></v-chip>
-                  </div>
-                </v-list-tile>
-                </draggable>
-                
-              </v-list>
-                <!-- Actions -->
-            <v-layout row wrap align-left>
-              <v-btn large round color="gray" v-for="owner in owners" :key="owner.id" @click="filterTodosByOwner(owner)">{{ owner }}</v-btn>
-              <v-btn large round color="green" class="white--text" @click="filtering = false">Liste complète</v-btn>
-            </v-layout>
+              <all-todos :todos="todos" :filteredTodos="filteredTodos" :filtering="filtering" :selectedOwner="selectedOwner"></all-todos>
+            
 
-            <!-- FooterActions -->
+
             <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
-              <!--<div>
-                <p>{{ invitation }}
-                  <v-chip class="elevation-2" color="green"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" to="/add"><strong>Nouvelle tâche</strong></nuxt-link></v-chip>
-                </p>
-              </div> -->
+              
               
             </div>
           
@@ -90,9 +56,10 @@
 <script>
 import { getters } from 'vuex'
 import { mutations } from 'vuex'
-import draggable from 'vuedraggable'
+
 import WelcomeCard from '../components/WelcomeCard'
 import FooterActions from '../components/FooterActions'
+import AllTodos from '../components/AllTodos'
 
 export default {
     data(){
@@ -112,7 +79,7 @@ export default {
     },
     computed: {
       invitation(){
-        console.log('TODOS FOR INVITATION', this.todos)
+
         if (!this.todos) return 'N\'hésitez pas à créer une tâche !'
         else return
       },
@@ -129,8 +96,6 @@ export default {
       },
       owners(){
         return this.$store.getters.getOwners
-        //if (this.$store.state.owners.length > 0) return this.$store.state.owners
-        //else return JSON.parse(localStorage.getItem('owners'))
       },
       currentOwner: {
         get(){
@@ -143,6 +108,7 @@ export default {
     },
 
     methods: {
+      
       display(todo){
         console.log(todo)
       },
@@ -185,12 +151,9 @@ export default {
     },
     mounted(){
       this.$store.commit('RESET_WITH_STORAGE')
-      //this.$store.dispatch('todos/resetWithStorage')
-      //console.log('MOUNTED AFTER STORAGE', window.localStorage.getItem('todos'))
-      //this.todos = JSON.parse(window.localStorage.getItem('todos'))
     },
     components: {
-      draggable,
+      AllTodos,
       WelcomeCard,
       FooterActions
     } 
