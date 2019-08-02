@@ -1,9 +1,6 @@
 <template>
   
-<v-layout
-    row
-    justify-center
-    align-center>
+<v-layout row justify-center align-center>
     <v-flex xs12 md10>
 
       <v-card>
@@ -19,31 +16,12 @@
       <sub-header :headerMessage="headerMessage"></sub-header>
       
    <v-card>
-     <display-todo :todo="todo" :ind="ind" :put="put"></display-todo>
-       <!--<v-card-text>
-           
-           <v-list v-if="todo" two-line style="margin-bottom: 20px">
-               <v-list-tile>
-                 <p class="inline-small"><strong>Titre : </strong></p><p class="inline-large"><strong>{{ todo.title }}</strong></p>
-               </v-list-tile>
-               <v-list-tile>
-                 <p class="inline-small">Description : </p><p class="inline-large">{{ todo.content }}</p>
-               </v-list-tile>
-               <v-list-tile>
-                 <p class="inline-small">Responsable : </p><p class="inline-large" style="color: red;">{{ todo.owner }}</p>
-                </v-list-tile>
-               <v-list-tile>
-                 <p class="inline-small">Date de réalisation : </p><p class="inline-large">{{ todo.date.day }} / {{ todo.date.month }} / {{ todo.date.year }}</p>
-                 <p>{{ howManyDays }}</p>
-               </v-list-tile>                
-               <v-list-tile>
-                 <div class="inline-small" style="padding-top: 10px"><p>Avancement : </p></div><v-progress-circular :rotate="-90" :size="60" :width="10" :value="todo.advancement" color="blue">{{ todo.advancement }}</v-progress-circular>
-               </v-list-tile>
-            </v-list>
-            </v-card-text> -->
-            <v-chip class="elevation-2" color="green"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" :to="`/put/${this.todo.title}`"><strong>Mettre à jour</strong></nuxt-link></v-chip>           
-            <v-chip color="red"><nuxt-link class="link white--text" style="text-decoration: none;" :to=" `/delete/${this.todo.title}` "><v-icon center>delete</v-icon></nuxt-link>Supprimer</v-chip>
-            <v-chip color="green" right><nuxt-link class="link white--text" style="text-decoration: none;" :to="'/'">Retour à la liste</nuxt-link></v-chip> 
+     <display-todo :todo="todo" :ind="ind" :put="put" :get="get"></display-todo>
+     <div>  
+            <v-chip class="elevation-2" color="green"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" :to="`/put/${this.todo.title}`"><strong>Mettre à jour</strong></nuxt-link></v-chip>
+            <v-chip class="elevation-2" color="red"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" :to="`/delete/${this.todo.title}`"><strong>Supprimer</strong></nuxt-link></v-chip>           
+            <v-chip class="elevation-2" color="green" right><nuxt-link class="link white--text" style="text-decoration: none;" :to="'/'">Retour à la liste</nuxt-link></v-chip> 
+     </div>
     </v-card>
     
     </v-flex>
@@ -51,6 +29,7 @@
 </template>
 
 <script>
+//<v-icon center>delete</v-icon>
 import { mutations } from 'vuex'
 import WelcomeCard from '../../components/WelcomeCard'
 import SubHeader from '../../components/SubHeader'
@@ -68,7 +47,9 @@ export default {
       addpage: false,
       one: true,
       two: false,
-      put: false
+      put: false,
+      get: true,
+      add: false
     }
   },
   computed: {

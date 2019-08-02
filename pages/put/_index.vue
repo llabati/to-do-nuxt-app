@@ -1,8 +1,5 @@
 <template>
-  <v-layout
-    row
-    justify-center
-    align-center>
+  <v-layout row justify-center align-center>
     <v-flex xs12 md10>
       
       <v-card>
@@ -17,43 +14,8 @@
       <sub-header :headerMessage="headerMessage"></sub-header>
       
       <v-card>   
-        <display-todo :todo="todo" :ind="ind" :put="put"></display-todo>
-        <!--<v-card-text>
-            <v-list two-line style="margin-bottom: 20px">
-                <v-list-tile>
-                 <p class="inline-small"><strong>Titre : </strong></p><p class="inline-large"><strong>{{ todo.title }}</strong></p><br>
-               </v-list-tile>
-               <v-list-tile>
-                <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier le titre" v-model="title"></v-text-field></v-list-tile-content>
-               </v-list-tile>
-               <v-list-tile>
-                 <p class="inline-small"><strong>Description : </strong></p><p class="inline-large">{{ todo.content }}</p>
-               </v-list-tile>
-               <v-list-tile>
-                  <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier la description" v-model="content"></v-text-field></v-list-tile-content>
-               </v-list-tile>         
-               <v-list-tile>
-                 <p class="inline-small"><strong>Responsable : </strong></p><p class="inline-large" style="color: red;">{{ todo.owner }}</p>
-               </v-list-tile>  
-               <v-list-tile>
-                 <v-list-tile-content><v-text-field solo style="display: block; width: 100%;" placeholder="Modifier le responsable" v-model="owner"></v-text-field></v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                 <div class="inline-small" style="padding-top: 10px"><p><strong>Avancement : </strong></p></div><v-progress-circular :rotate="-90" :size="60" :width="10" :value="todo.advancement" color="blue">{{ todo.advancement }}</v-progress-circular>
-                <v-list-tile-content><p>Modifier l'avancement : </p>
-                  <div>
-                    <v-btn v-if="todo.advancement === 0" @click="changeAdvancement(20)">20</v-btn>
-                    <v-btn v-if="todo.advancement < 40" @click="changeAdvancement(40)">40</v-btn>
-                    <v-btn v-if="todo.advancement < 60" @click="changeAdvancement(60)">60</v-btn>
-                    <v-btn v-if="todo.advancement < 80" @click="changeAdvancement(80)">80</v-btn>
-                    <v-btn v-if="todo.advancement < 100" @click="changeAdvancement(100)">100</v-btn> 
-                    </div>
-                </v-list-tile-content>
-               </v-list-tile>
-                    
-            </v-list>
-            <v-chip class="link" color="orange" v-on:click="setChange(todo)">Modifier</v-chip>
-        </v-card-text> -->
+        <display-todo :todo="todo" :ind="ind" :get="get" :put="put" :add="add"></display-todo>
+        
       <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
       </v-card>
     </v-flex>
@@ -79,7 +41,10 @@ export default {
       putpage: false,
       deletepage: false,
       addpage: false,
-      put: true
+      get: true,
+      put: true,
+      add: false,
+      updated: {}
     }
   },
   computed: {
@@ -94,37 +59,45 @@ export default {
     }
   },
   methods: {
-    setToCompleted: function(todo){
-            let btnTrue = this.$refs.true
-            let progress = this.$refs.prog
-            btnTrue.style.display='none'
-            progress.textContent = "Fini"
-            this.todo.advancement = 100;
-            console.log('set to completed', this.todo)
-            this.setChange(null, null, null, true)
+    setTitle(){
+      this.title = this.$store.state.title
+    },
+    setContent(){
+      this.content = this.$store.state.content
+    },
+    setOwner(){
+      this.owner = this.$store.state.owner
+    },
+    setAdvancement(){
+      this.advancement = this.$store.state.advancement
+    },
+    setDay(){
+      this.day = this.$store.state.day
+    },
+    setMonth(){
+      this.month = this.$store.state.month
+    },
+    setYear(){
+      this.year = this.$store.state.year
+    },
+    setChange: function(){
+        this.updated.ind = this.ind,
+        this.updated.title = this.title,
+        this.updated.owner = this.owner,
+        this.updated.content = this.content,
+        updatad.advancement = this.advancement 
+        let date = {}
+        date.day = this.day
+        date.month = this.month
+        date.year = this.year
+        this.updated.date = date
+        this.$store.dispatch('addNewTodo', this.update)
 
-        },
-        changeAdvancement(value){
-          this.advancement = value
-        },
-        setChange: function(){
-          
-          console.log('TODO avant commit update')
-          let res = {
-            ind: this.ind,
-            title: this.title,
-            owner: this.owner,
-            content: this.content,
-            advancement: this.advancement 
-          }
-          /*if (this.title !== '') this.todo.title = this.title
-          if (this.owner !== '') this.todo.owner = this.owner
-          if (this.content !== '') this.todo.content = this.content
-          if (this.advancement !== '') this.todo.advancement = this.advancement  */
-          console.log('TODO JUST BEFORE UPDATE COMMIT', res)
-          this.$store.commit('UPDATE_TODO', res)
-          this.$router.push('/')
-        }
+      
+      console.log('TODO JUST BEFORE UPDATE COMMIT', res)
+      this.$store.dispatch('updateTodo', res)
+      this.$router.push('/')
+    }
   },
   components: {
     WelcomeCard,

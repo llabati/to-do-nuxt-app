@@ -1,50 +1,39 @@
 <template>
 
-  <v-layout
-    row
-    justify-center
-    align-center>
+  <v-layout row justify-center align-center>
     <v-flex xs12 md10>
       <v-card> 
         <v-tooltip bottom color="blue"><v-card-title slot="activator" class="headline amber lighten-4 indigo--text text--darken-3">Ma liste des tâches</v-card-title><span>Pour voir les détails, cliquez sur la tâche.</span></v-tooltip>
-        <!-- Registration -->
+        
         <v-card-text>
-            <v-form v-if="!account">
-            <v-text-field
-                v-model="owner"
-                label="Votre Prénom"
-                required>
-            </v-text-field>
-  
-            <v-btn color="green" class="white--text" @click="validateAccount">Connectez-vous</v-btn>
-            <v-btn color="deep-orange lighten-4" @click="createAccount">Créez votre compte</v-btn>
-            </v-form> 
+            <v-form v-if="!currentOwner">
+              <v-text-field v-model="owner" label="Votre Prénom" required></v-text-field>
+    
+              <v-btn color="green" class="white--text" @click="validateAccount">Connectez-vous</v-btn>
+              <v-btn color="deep-orange lighten-4" @click="createAccount">Créez votre compte</v-btn>
             <p v-if="warning" style="color: red; margin-bottom: 10px;"><strong>Vous ne semblez pas être déjà identifié. Veuillez créer votre compte.</strong></p>
+            </v-form> 
 
           <welcome-card :welcomeMessage="welcomeMessage"></welcome-card>
-           
-            <div v-if="currentOwner">
-              <div>
-                <h3>Bienvenue à {{ currentOwner }} !!!</h3>
-                <p>Vous n'êtes pas {{ currentOwner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
-              </div>
-              <div v-if="!currentOwner && !account">
-                <h3>Bienvenue à {{ owner }} !</h3>
-                <p>Vous n'êtes pas {{ owner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
-              </div> 
-              <all-todos :todos="todos" :filteredTodos="filteredTodos" :filtering="filtering" :selectedOwner="selectedOwner"></all-todos>
-            
 
+          <hr class="my-3">
 
-            <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
-              
-              
+          <div v-if="currentOwner">
+            <div>
+              <h3>Bienvenue à {{ currentOwner }} !</h3>
+              <p>Vous n'êtes pas {{ currentOwner }} ? <v-chip @click="changeOwner">Identifiez-vous ici</v-chip></p>
             </div>
+            
+            <all-todos :filtering="filtering" :selectedOwner="selectedOwner" :act="act"></all-todos>
+          <v-layout row wrap align-left>
+            <v-btn large round color="gray" v-for="owner in owners" :key="owner.id" @click="filterNow(owner)">{{ owner }}</v-btn>
+            <v-btn large round color="green" class="white--text" @click="filtering = false">Liste complète</v-btn>
+          </v-layout>
           
-        </v-card-text>
+          <footer-actions :notodo="notodo" :getpage="getpage" :putpage="putpage" :deletepage="deletepage" :addpage="addpage" :todo="todo"></footer-actions>
+   
+          </div>
           
-        <v-card-text>
-
         </v-card-text>
         
       </v-card>
@@ -54,9 +43,7 @@
 </template>
 
 <script>
-import { getters } from 'vuex'
-import { mutations } from 'vuex'
-
+import { getters, mutations } from 'vuex'
 import WelcomeCard from '../components/WelcomeCard'
 import FooterActions from '../components/FooterActions'
 import AllTodos from '../components/AllTodos'
@@ -66,11 +53,12 @@ export default {
       return {
         welcomeMessage: 'Tous les utilisateurs identifiés peuvent déposer leurs tâches et en noter l\'avancement. Bienvenue à tous !',
         owner: '',
+        todo: {},
         account: false,
         filtering: false,
         warning: false,
         selectedOwner: '',
-        filteredTodos: [],
+        act: false,
         getpage: false,
         putpage: false,
         deletepage: false,
@@ -79,12 +67,12 @@ export default {
     },
     computed: {
       invitation(){
-
         if (!this.todos) return 'N\'hésitez pas à créer une tâche !'
         else return
-      },
+      }, 
       notodo(){
-        if (this.todos.length === 0) return true
+        if (this.todos) return false
+        if ( !this.todos || this.todos.length === 0 ) return true
       },
       todos: {
         get(){
@@ -99,58 +87,55 @@ export default {
       },
       currentOwner: {
         get(){
-          return this.$store.state.currentOwner
+          if (this.$store.state.currentOwner) {
+            this.warning = false
+            return this.$store.state.currentOwner
+          }
+          //else return this.warning = true 
         },
         set(value){
-          this.$store.commit('CHANGE_CURRENTOWNER', value)
+          this.$store.dispatch('changeCurrentOwner', value)
         }
       }
     },
 
     methods: {
-      
-      display(todo){
-        console.log(todo)
-      },
-      getPage: function(todo) {
-        console.log('From the homepage', todo)
-        this.$router.push( `/get/${todo.title}` )
-      },
 
-      goToFullPage(todo){
-        console.log('Go to full page', todo)
-        let title = todo.title
-        return this.$router.push(`/get/${title}`)
-      },
-      
       validateAccount() {
         let owners = this.$store.state.owners
-        if ( owners.includes(this.owner) ) this.account = true
-        else this.warning = true 
-        this.currentOwner = this.owner
-        this.filtering = false
+        if ( owners.includes(this.owner) ) {
+          this.currentOwner = this.owner
+          this.account = true
+        }
+        else this.warning = true
       },
       createAccount(){
         let newOwner = this.owner
-        this.$store.commit('ADD_OWNER', newOwner)
+        let owners = this.$store.state.owners
+        if ( !owners.includes(newOwner) ) this.$store.dispatch('addOwner', newOwner)
+        this.currentOwner = newOwner
         this.account = true
         this.warning = false
         this.filtering = false
       },
       changeOwner(){
+        this.currentOwner = ''
         this.account = false
+        this.warning = false
         this.filtering = false
       },
-      filterTodosByOwner(owner){
-        console.log('filteringTodos...', owner)
-        this.filteredTodos = this.todos.filter(t => t.owner === owner)
+      filterNow(owner){
         this.filtering = true
+        this.act = !this.act
         this.selectedOwner = owner
-        this.currentOwner = owner
+      },
+      reorderTodos(todos){
+        this.$store.dispatch('reorderTodos', todos)
       }
     },
     mounted(){
-      this.$store.commit('RESET_WITH_STORAGE')
+      this.$store.dispatch('resetOwnersWithStorage')
+      //this.$store.dispatch('resetTodosWithStorage')
     },
     components: {
       AllTodos,

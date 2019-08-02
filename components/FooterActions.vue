@@ -1,9 +1,13 @@
 <template>
     <div class="footer-item">
         <p>{{ invitation }}   
-            <v-chip v-if="addpage" class="elevation-2 item-center" color="green"><nuxt-link class="link white--text" style="text-decoration: none; float: right;" to="/add"><strong>Nouvelle tâche</strong></nuxt-link></v-chip>
-            <v-chip v-if="getpage" color="blue" right><nuxt-link class="link white--text" style="text-decoration: none;" :to="'/'">Retour à la liste</nuxt-link></v-chip>
-            </p>
+            <v-chip v-if="addpage" class="elevation-2 item-center" color="green">
+                <nuxt-link class="link white--text" style="text-decoration: none; float: right;" to="/add"><strong>Nouvelle tâche</strong></nuxt-link>
+            </v-chip>
+            <v-chip v-if="getpage" color="blue" right>
+                <nuxt-link class="link white--text" style="text-decoration: none;" to="/">Retour à la liste</nuxt-link>
+            </v-chip>
+        </p>
     </div>
 </template>
 

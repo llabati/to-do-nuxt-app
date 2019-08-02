@@ -1,8 +1,5 @@
 <template>
-  <v-layout
-    row
-    justify-center
-    align-center>
+  <v-layout row  justify-center  align-center>
     <v-flex xs12 md10>
 
       <v-card>
@@ -16,11 +13,7 @@
         
       </v-card>
       <sub-header :headerMessage="headerMessage"></sub-header>
-      <!--<v-toolbar>
-          <v-toolbar-title>Tâche à supprimer pour {{ todo.owner }}</v-toolbar-title> 
-          <v-spacer></v-spacer>
-          <v-alert success v-if="success">Cette tâche vient d'être supprimée.</v-alert>
-      </v-toolbar> -->
+      
       <v-card>
         <v-card-title class="headline">{{ headline }}</v-card-title>
           <v-card-actions>
@@ -42,7 +35,6 @@ export default {
         return {
           success: false,
           welcomeMessage: 'Supprimer une tâche... est un moyen de pouvoir ajouter une autre tâche.',
-
           notodo:false,
           getpage: true,
           putpage: false,
@@ -69,7 +61,7 @@ export default {
     
     methods: {
         deleteThisTodo: function(title){
-          this.$store.commit('DELETE_TODO', this.title)
+          this.$store.dispatch('deleteTodo', this.title)
           this.success = true
           setTimeout(this.$router.push('/'), 5000)
         }

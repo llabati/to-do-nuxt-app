@@ -1,9 +1,6 @@
 <template>
   
-<v-layout
-    row
-    justify-center
-    align-center>
+<v-layout  row  justify-center  align-center>
     <v-flex xs12 md10>
       <v-card>
         <v-card-title class="headline amber lighten-4 indigo--text text--darken-3">Ajouter une tâche</v-card-title>
@@ -13,66 +10,8 @@
           
         </v-card-text>
         <sub-header :headerMessage="headerMessage"></sub-header>
-        <!--<v-toolbar>
-              <v-toolbar-title>Caractéristiques de la tâche à ajouter</v-toolbar-title>
-        </v-toolbar> -->
-        <v-card-text>
-            <v-list two-line>
-                <!-- component ActionItem -->
-                <v-list-tile>
-                    <v-list-tile-content xs12>
-                        <v-text-field style="display: block; width: 100%;" ref="title" solo label="Titre de la tâche" placeholder="Donnez un titre" v-model="title"></v-text-field>
-                    </v-list-tile-content>
-                </v-list-tile>
-                <!-- component ActionItem -->
-                <v-list-tile>
-                    <v-list-tile-content xs12>
-                        <v-textarea ref="content" auto-grow rows="3" style="display: block; width: 100%;" solo placeholder="Décrivez la tâche" v-model="content"></v-textarea>
-                    </v-list-tile-content>
-                </v-list-tile>
-                
-                <v-list-tile>
-                    <v-list-tile-content>
-                        <p>Responsable de la tâche: {{ owner }}<v-chip color="amber lighten-4" @click="changeOwner">Changer le responsable</v-chip></p>
-                    </v-list-tile-content>
-                </v-list-tile>
-
-                <v-list-tile v-if="change">
-                    <v-list-tile-content>
-                      <v-text-field v-show="change" style="display: block; width: 100%;" ref="owner" solo label="Nouveau responsable" v-model="newOwner"></v-text-field>
-                    </v-list-tile-content>
-                </v-list-tile>  
-
-                <v-list-tile>
-                    <v-list-tile-content>
-                      <p>Date de réalisation</p><div style="display: flex; flex-direction: row;">
-                      <div style="display: inline-block; width: 30%; margin-right: 4%;" ><input style="border: solid 1px gray" ref="day"  placeholder="Jour" v-model="day"></div>
-                      <div style="display: inline-block; width: 30%; margin-right: 4%;" ><input style="border: solid 1px gray" ref="month"  placeholder="Mois (en chiffres)" v-model="month"></div>
-                      <div style="display: inline-block; width: 30%;" ><input style="border: solid 1px gray" ref="year"  placeholder="Année" v-model="year">
-                      <v-chip @click="setDate">Valider la date</v-chip></div> 
-                      </div>
-                    </v-list-tile-content>
-                </v-list-tile>  
-
-                <v-list-tile style="margin-top: 20px;">
-                    <v-list-tile-content>
-                        <p>Avancement de la tâche: {{ advancement }}</p>
-                        <div>
-                    <v-btn @click="setAdvancement(20)">20</v-btn>
-                    <v-btn @click="setAdvancement(40)">40</v-btn>
-                    <v-btn @click="setAdvancement(60)">60</v-btn>
-                    <v-btn @click="setAdvancement(80)">80</v-btn>
-                    </div>
-                    </v-list-tile-content>
-                    
-                </v-list-tile>
-            </v-list>   
-        </v-card-text>
-        <v-card-actions>
-            <v-chip color="green" class="white--text" v-on:click="addThisTodo">Confirmez l'ajout</v-chip>
-            <!--<v-chip color="blue" class="white--text" v-on:click="$router.push('/')">Retour à la liste</v-chip> -->
-        </v-card-actions> 
-
+        <display-todo :todo="todo" :ind="ind" :get="get" :put="put" :add="add" v-on:addingTitle="setTitle" v-on:addingTodo="buildThisTodo"></display-todo>
+        
       <footer-actions :notodo="notodo" :getpage="getpage" :addpage="addpage"></footer-actions>
       </v-card>
     </v-flex>
@@ -83,6 +22,7 @@
 import WelcomeCard from '../../components/WelcomeCard'
 import SubHeader from '../../components/SubHeader'
 import FooterActions from '../../components/FooterActions'
+import DisplayTodo from '../../components/DisplayTodo'
 export default {
   
   data(){
@@ -93,6 +33,7 @@ export default {
       two: false,
       title: '',
       content: '',
+      owner: '',
       date: {},
       change: false,
       newOwner: '', 
@@ -104,48 +45,92 @@ export default {
       getpage: true,
       putpage: false,
       deletepage: false,
-      addpage: false
+      addpage: false,
+      get: false,
+      put: false,
+      add: true,
+      todo:{},
+      ind: '',
+      newTodo: {}
+      //newTitle:''
+
 
     }
   },
-  computed: {
+  /*computed: {
     owner() {
-        if (this.newOwner === '')
-        return this.$store.state.currentOwner
-        else
-        return this.newOwner
-      }
-  },
+        if (this.newOwner === '') return this.$store.state.currentOwner
+        else return this.newOwner
+      },
+      newTitle(){
+        if ( this.buildThisTodo ) return this.buildThisTodo(newTitle)
+        else return ''
+      },
+      /*title(){
+        return this.$store.state.title
+      } 
+      
+  }, */
   methods: {
+    setTitle(title){
+      console.log('SETTITLE')
+      this.title = title
+      console.log('THISTITLE', this.title)
+    },
+    setContent(content){
+      this.content = content
+    },
+    setOwner(owner){
+      this.owner = owner
+    },
+    setAdvancement(advancement){
+      this.advancement = advancement
+    },
+    setDay(day){
+      this.day = day
+    },
+    setMonth(month){
+      this.month = month
+    },
+    setYear(year){
+      this.year = year
+    },
+    buildThisTodo(newTodo){
+      /*this.newTodo.title = this.title
+      this.newTodo.content = this.content
+      this.newTodo.owner = this.owner
+      this.newTodo.advancement = this.advancement
+      this.newTodo.day = this.day
+      this.newTodo.month = this.month
+      this.newTodo.year = this.year */
+      console.log('buildthistodo')
+      this.newTodo = newTodo
+      
+    },
     addThisTodo(){
-      //console.log('before commit', this.$store.state.todos)
-      let newTodo = {}
+      console.log('ADD RECEIVING NEWTODO', this.newTodo, newTodo)
+      this.$store.dispatch('addNewTodo', this.newTodo)
+      /*let newTodo = {}
       newTodo.title = this.title
       newTodo.content = this.content
       newTodo.owner = this.owner
       newTodo.advancement = this.advancement
-      newTodo.date = this.date
-      this.$store.commit('ADD_NEWTODO', newTodo)
-      //console.log('After commit newTodo', newTodo)
-      this.title = ''
-      this.content = ''
+      newTodo.date = this.date 
+      this.$store.dispatch('addNewTodo', newTodo)
+      //this.title = ''
+      //this.content = ''*/
 
     },
+    
     changeOwner(){
       this.change = true
     },
-    setAdvancement(value){
-      this.advancement = value
-    },
-    setDate(){
-      this.date.day = this.day
-      this.date.month = this.month
-      this.date.year = this.year
-    }
+    
   },
   components: {
     WelcomeCard,
     SubHeader,
+    DisplayTodo,
     FooterActions
   }
   
